@@ -46,17 +46,48 @@ exports.login = async (req, res) => {
   }
 };
 
+const verifyToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, 'avinashassignments');
+    return decoded;
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
+};
+
 
 exports.editProfile = async (req, res) => {
   try {
     const { firstName, lastName, phone } = req.body;
-    const userId = req.userId; 
-    const user = await User.findByIdAndUpdate(userId, { firstName, lastName, phone }, { new: true });
+
+   
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: Token not provided' });
+    }
+
     
+    const decodedToken = verifyToken(token.replace('Bearer ', ''));
+
+
+    const userId = decodedToken.userId;
+
+    
+    const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
+  
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.phone = phone;
+
+  
+    await user.save();
+
     res.json({ message: 'Profile updated successfully', user });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -64,17 +95,26 @@ exports.editProfile = async (req, res) => {
 };
 
 
-exports.getUserDetails = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const user = await User.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
 
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+
+
+
+
+
+// exports.editProfile = async (req, res) => {
+//   try {
+//     const { firstName, lastName, phone } = req.body;
+//     const userId = req.userId; 
+//     const user = await User.findByIdAndUpdate(userId, { firstName, lastName, phone }, { new: true });
+    
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+    
+//     res.json({ message: 'Profile updated successfully', user });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
