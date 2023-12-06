@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const connect = require("./configs/db");
-const { register, login, editProfile, getUserDetails } = require("./controllers/auth.controller");
-const authMiddleware = require("../src/middleware/authMiddleware");
+const connect = require("./src/configs/db");
+const { register, login, editProfile, getUserDetails } = require("./src/controllers/auth.controller");
+const authMiddleware = require("./src/middleware/authMiddleware");
 
 app.use(express.json());
 app.use(cors());
